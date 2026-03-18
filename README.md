@@ -29,6 +29,9 @@
 6. [GitHub 연동 및 자동화](#6-github-연동-및-자동화)
    - [6.1 GitHub CLI (gh) 설치 및 설정](#61-github-cli-gh-설치-및-설정)
    - [6.2 AI를 활용한 릴리즈 자동화](#62-ai를-활용한-릴리즈-자동화)
+7. [bkit 설치](#7-bkit-설치)
+   - [7.1 Claude Code에서 설치](#71-claude-code에서-설치)
+   - [7.2 Gemini CLI에서 설치](#72-gemini-cli에서-설치)
 
 ---
 
@@ -360,6 +363,40 @@ gh auth status
     # 태그 생성부터 릴리즈까지 한 번에 처리
     gh release create v1.2.0 --generate-notes
     ```
+
+
+---
+
+## 7. bkit 설치
+
+**bkit (Vibecoding Kit)**은 PDCA 방법론을 기반으로 설계된 AI 네이티브 개발 도구로, Claude Code와 Gemini CLI의 기능을 보강하는 플러그인 형태로 제공됩니다.
+
+### 7.1 Claude Code에서 설치
+
+Claude Code 터미널(Interactive Shell) 내에서 아래 플러그인 명령어를 순서대로 실행합니다.
+
+```bash
+# 1. 플러그인 마켓플레이스 추가
+/plugin marketplace add popup-studio-ai/bkit-claude-code
+
+# 2. bkit 플러그인 설치
+/plugin install bkit
+```
+
+### 7.2 Gemini CLI에서 설치
+
+터미널에서 아래 명령어를 실행하여 Gemini CLI용 bkit 익스텐션을 설치합니다.
+
+**방법 1: 자동 설치 (권장)**
+```bash
+gemini extensions install https://github.com/popup-studio-ai/bkit-gemini.git
+```
+
+**방법 2: 수동 설치 (GitHub Clone)**
+자동 설치가 원활하지 않을 경우, 아래 경로에 직접 프로젝트를 복제합니다.
+```bash
+git clone https://github.com/popup-studio-ai/bkit-gemini.git ~/.gemini/extensions/bkit
+```
 
 ---
 

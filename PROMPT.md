@@ -24,6 +24,7 @@
 4. Claude Code 설치 및 설정 방법 (npm 설치, .aws 디렉토리 기반 보안 인증 설정, 필수 환경변수(CLAUDE_CODE_USE_BEDROCK, AWS_REGION 등) 및 선택적 모델 지정 포함)
 5. Antigravity 설치 및 설정 (설치 가이드, 필수 VS Code 확장 프로그램(Remote-SSH, Claude Code for VS Code 등), 리모트 서버 접속 방법, 터미널 대화형 CLI(Gemini/Claude) 활용 및 확장 프로그램 UI 사용법 포함)
 6. GitHub 연동 및 자동화 (GitHub CLI(gh) 설치 및 인증, AI 기반 자동화 릴리즈 가이드)
+7. bkit 설치 (Claude Code 플러그인 마켓플레이스 활용 및 Gemini CLI 익스텐션 설치 방법 포함)
 
 문서 하단 구성:
 - 문의 사항 및 피드백용 이메일(20eung@gmail.com)을 포함하라.
