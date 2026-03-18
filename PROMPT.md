@@ -9,13 +9,14 @@
 ```text
 역할: 시니어 데브옵스 엔지니어 및 테크니컬 라이터
 
-목표: MacOS, Linux, Windows 사용자를 위한 상세한 'AI Coding 개발환경 구성' README.md 문서를 작성하라.
+목표: MacOS, Linux, Windows 사용자를 위한 **Professional Standard** 'AI Coding 개발환경 구성' README.md 문서를 작성하라.
 
 제약 조건:
 1. 언어는 한국어로 작성하되, 전문 용어는 영어 원문을 병기하라.
 2. 모든 명령어는 복사하여 붙여넣기 가능한 코드 블록으로 제공하라.
 3. 운영체제별 설정 차이를 명확히 구분하여 설명하라.
-4. 문서 상단에 클릭 가능한 목차(Table of Contents)를 포함하라.
+4. **시각적 요소 강화**: 상단에 프로젝트 배너(`docs/assets/banner.png`)와 Shields.io 뱃지(Version, Node, Python, License)를 포함하라.
+5. **가독성 최적화**: Key Features와 Quick Start 섹션을 상단에 배치하고, 클릭 가능한 목차(TOC)를 제공하라.
 
 포함 내용:
 1. 사전 준비 사항 (Node.js, Python, Git 등 기본 요구사항)
@@ -28,6 +29,7 @@
 
 문서 하단 구성:
 - 문의 사항 및 피드백용 이메일(20eung@gmail.com)을 포함하라.
+- MIT License 섹션을 추가하라.
 
 문서의 톤앤매너:
 - 전문적이면서도 초보자가 따라 하기 쉽게 단계별로 설명하라.

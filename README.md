@@ -1,10 +1,39 @@
-# AI Coding 개발환경 구성 가이드
+<p align="center">
+  <img src="docs/assets/banner.png" alt="AI Coding Setup Banner" width="100%">
+</p>
 
-이 문서는 MacOS/Linux 및 Windows 환경에서 **Gemini CLI**, **Claude Code**, 그리고 **Antigravity**를 활용한 최적의 AI 코딩 개발환경을 구성하는 방법을 안내합니다.
+# 🚀 AI Coding Setup
+
+이 프로젝트는 **MacOS, Linux, Windows** 환경에서 최첨단 AI 개발 도구들을 결합하여 생산성을 극대화하는 **AI-Native 개발 환경**을 구축하는 가이드입니다.
+
+<p align="center">
+  <img src="https://img.shields.io/badge/version-1.0.0-blue.svg" alt="Version">
+  <img src="https://img.shields.io/badge/Node.js-18%2B-green.svg" alt="Node.js">
+  <img src="https://img.shields.io/badge/Python-3.10%2B-blue.svg" alt="Python">
+  <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License">
+</p>
 
 ---
 
-## 목차
+## ✨ Key Features
+
+- 🧠 **Triple AI Integration**: Gemini CLI, Claude Code, Antigravity의 장점을 결합한 통합 워크플로우
+- 🛡️ **Security First**: API 키 노출을 방지하는 보안 설정 가이드 (AWS Bedrock, Environment Variables)
+- ⚙️ **Optimized Remote Dev**: SSH와 Remote-Explorer를 활용한 고성능 원격 서버 개발 환경
+- 🤖 **PDCA Automation**: AI를 활용한 릴리즈 노트 생성 및 태그 자동화 배포 시스템
+- 🔌 **bkit Powered**: `bkit.ai` 플러그인을 통한 AI 네이티브 기능 확장
+
+## ⚡ Quick Start
+
+가장 빠르게 환경을 구성하는 3단계 핵심 과정입니다.
+
+1.  **기본 도구 설치**: `Node.js`, `Python`, `Git`, `gh` 설치
+2.  **API 인증**: Google AI Studio, AWS Bedrock API 키 준비 및 환경 설정
+3.  **에이전트 활성화**: Antigravity, Claude Code, Gemini CLI의 Interactive Shell 실행
+
+---
+
+## 📑 목차
 
 1. [사전 준비 사항](#1-사전-준비-사항-prerequisites)
 2. [SSH 및 Git 기본 설정](#2-ssh-및-git-기본-설정)
@@ -399,5 +428,9 @@ git clone https://github.com/popup-studio-ai/bkit-gemini.git ~/.gemini/extension
 ```
 
 ---
+
+## 📄 License
+
+이 프로젝트는 **MIT License**에 따라 배포됩니다. 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세요.
 
 **문의 사항 및 피드백**: 20eung@gmail.com
