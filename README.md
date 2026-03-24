@@ -280,6 +280,8 @@ aws_secret_access_key = YOUR_SECRET_ACCESS_KEY
 
 Claude Code가 Bedrock을 사용하도록 필수 환경변수를 설정하고 실행합니다.
 
+**MacOS/Linux:**
+
 ```bash
 # Bedrock 활성화 및 리전 설정 (필수)
 export CLAUDE_CODE_USE_BEDROCK=1
@@ -291,6 +293,17 @@ export AWS_REGION="ap-northeast-2" # Bedrock 모델 권한을 받은 리전
 # Claude Code 실행
 claude
 ```
+
+**Windows (PowerShell):**
+
+```powershell
+setx CLAUDE_CODE_USE_BEDROCK "1"
+setx AWS_REGION "ap-northeast-2"
+
+# (선택) Anthropic Model 지정
+setx ANTHROPIC_MODEL "global.anthropic.claude-sonnet-4-6"
+```
+
 
 > [!TIP]
 > 더 자세한 설정 방법은 [claude-code-use-bedrock](https://github.com/20eung/claude-code-use-bedrock) 문서를 참고하세요.
