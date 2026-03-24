@@ -238,7 +238,7 @@ Claude Code에 마이그레이션 요청 (n8n-MCP + skills 활성화 상태)
 - [x] 섹션 11 작성 및 추가
 - [x] 섹션 12 작성 및 추가
 - [x] PROMPT.md 업데이트
-- [ ] GitHub 업로드
+- [x] GitHub 업로드 (v1.2.0 릴리즈 완료)
 
 ---
 

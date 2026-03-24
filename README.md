@@ -7,7 +7,7 @@
 이 프로젝트는 **MacOS, Linux, Windows** 환경에서 최첨단 AI 개발 도구들을 결합하여 생산성을 극대화하는 **AI-Native 개발 환경**을 구축하는 가이드입니다.
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.0.0-blue.svg" alt="Version">
+  <img src="https://img.shields.io/badge/version-1.2.0-blue.svg" alt="Version">
   <img src="https://img.shields.io/badge/Node.js-18%2B-green.svg" alt="Node.js">
   <img src="https://img.shields.io/badge/Python-3.10%2B-blue.svg" alt="Python">
   <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License">
