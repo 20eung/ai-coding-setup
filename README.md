@@ -583,7 +583,7 @@ gh auth status
 
 ## 7. bkit 설치
 
-**bkit (Vibecoding Kit)**은 PDCA 방법론을 기반으로 설계된 AI 네이티브 개발 도구로, Claude Code와 Gemini CLI의 기능을 보강하는 플러그인 형태로 제공됩니다.
+**bkit (Vibecoding Kit)** 은 PDCA 방법론을 기반으로 설계된 AI 네이티브 개발 도구로, Claude Code와 Gemini CLI의 기능을 보강하는 플러그인 형태로 제공됩니다.
 
 ### 7.1 Claude Code에서 설치
 
