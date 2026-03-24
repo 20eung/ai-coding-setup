@@ -61,6 +61,31 @@
 7. [bkit 설치](#7-bkit-설치)
    - [7.1 Claude Code에서 설치](#71-claude-code에서-설치)
    - [7.2 Gemini CLI에서 설치](#72-gemini-cli에서-설치)
+8. [Docker 환경 구성](#8-docker-환경-구성)
+   - [8.1 Docker Desktop 설치](#81-docker-desktop-설치)
+   - [8.2 docker-compose.yml 구조 이해](#82-docker-composeyml-구조-이해)
+   - [8.3 .env 파일 분리 관리](#83-env-파일-분리-관리)
+9. [n8n 컨테이너 설치 및 실행](#9-n8n-컨테이너-설치-및-실행)
+   - [9.1 n8n이란?](#91-n8n이란)
+   - [9.2 docker-compose로 n8n 실행](#92-docker-compose로-n8n-실행)
+   - [9.3 웹 UI 접속 확인](#93-웹-ui-접속-확인)
+   - [9.4 n8n API 설정](#94-n8n-api-설정-mcp-연동-준비)
+10. [n8n-MCP + n8n-skills 설정](#10-n8n-mcp--n8n-skills-설정)
+    - [10.1 n8n-MCP란?](#101-n8n-mcp란)
+    - [10.2 n8n-MCP 설치](#102-n8n-mcp-설치)
+    - [10.3 Claude Code에 MCP 연동](#103-claude-code에-mcp-연동)
+    - [10.4 n8n-skills란?](#104-n8n-skills란)
+    - [10.5 n8n-skills 설치](#105-n8n-skills-설치)
+11. [Python → n8n 마이그레이션 전략](#11-python--n8n-마이그레이션-전략)
+    - [11.1 마이그레이션 대상 유형 분류](#111-마이그레이션-대상-유형-분류)
+    - [11.2 마이그레이션 단계별 절차](#112-마이그레이션-단계별-절차)
+    - [11.3 Claude Code에게 마이그레이션 요청하는 법](#113-claude-code에게-마이그레이션-요청하는-법)
+    - [11.4 마이그레이션 검증 체크리스트](#114-마이그레이션-검증-체크리스트)
+12. [Claude Code로 n8n 워크플로우 개발](#12-claude-code로-n8n-워크플로우-개발)
+    - [12.1 권장 개발 플로우](#121-권장-개발-플로우)
+    - [12.2 워크플로우 JSON Import/Export](#122-워크플로우-json-importexport)
+    - [12.3 실전 예시](#123-실전-예시-python-데몬--n8n-워크플로우)
+    - [12.4 트러블슈팅](#124-트러블슈팅)
 
 ---
 
@@ -439,6 +464,394 @@ gemini extensions install https://github.com/popup-studio-ai/bkit-gemini.git
 ```bash
 git clone https://github.com/popup-studio-ai/bkit-gemini.git ~/.gemini/extensions/bkit
 ```
+
+---
+
+## 8. Docker 환경 구성
+
+n8n을 컨테이너로 실행하기 위한 Docker 환경을 준비합니다.
+
+### 8.1 Docker Desktop 설치
+
+**MacOS:**
+```bash
+brew install --cask docker
+```
+설치 후 Docker Desktop 앱을 실행하여 엔진을 시작합니다.
+
+**Linux (Ubuntu/Debian):**
+```bash
+sudo apt update
+sudo apt install -y docker.io docker-compose-plugin
+sudo usermod -aG docker $USER  # 재로그인 필요
+```
+
+**Windows:**
+[Docker Desktop 공식 페이지](https://www.docker.com/products/docker-desktop/)에서 설치 파일을 다운로드합니다.
+
+**설치 확인:**
+```bash
+docker --version
+docker compose version
+```
+
+### 8.2 docker-compose.yml 구조 이해
+
+n8n 실행에 사용할 `docker-compose.yml` 예시와 각 항목 설명입니다.
+
+```yaml
+services:
+  n8n:
+    image: n8nio/n8n:latest      # n8n 공식 Docker 이미지
+    container_name: n8n
+    restart: unless-stopped      # 서버 재시작 시 자동으로 컨테이너 재시작
+    ports:
+      - "5678:5678"              # 호스트포트:컨테이너포트
+    environment:
+      - N8N_HOST=${N8N_HOST}     # 접속 호스트 (예: localhost 또는 서버IP)
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=${N8N_PROTOCOL}  # http 또는 https
+      - WEBHOOK_URL=${WEBHOOK_URL}    # 외부 Webhook 수신 URL
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}  # 자격증명 암호화 키
+    volumes:
+      - n8n_data:/home/node/.n8n  # 워크플로우/데이터 영속성 보장
+    env_file:
+      - .env                      # 환경변수 파일 분리
+
+volumes:
+  n8n_data:                       # Docker 관리 볼륨 (데이터 보존)
+```
+
+### 8.3 .env 파일 분리 관리
+
+API 키, 비밀번호 등 민감한 정보는 `.env` 파일로 분리하여 관리합니다.
+
+**`.env` 파일 예시:**
+```bash
+N8N_HOST=localhost
+N8N_PORT=5678
+N8N_PROTOCOL=http
+WEBHOOK_URL=http://localhost:5678
+N8N_ENCRYPTION_KEY=your_random_32char_key_here
+N8N_API_KEY=                  # 9.4에서 발급 후 입력
+```
+
+> [!CAUTION]
+> `.env` 파일에는 민감한 정보가 포함되어 있습니다. 반드시 `.gitignore`에 추가하세요.
+
+```bash
+# .gitignore에 추가
+echo ".env" >> .gitignore
+```
+
+---
+
+## 9. n8n 컨테이너 설치 및 실행
+
+### 9.1 n8n이란?
+
+n8n은 **오픈소스 워크플로우 자동화 툴**입니다. Zapier/Make와 유사하지만 셀프호스팅이 가능합니다.
+
+**왜 Python 데몬 대신 n8n인가?**
+
+| 기존 Python 데몬 | n8n 워크플로우 |
+|---|---|
+| 코드 읽기 전까지 로직 파악 불가 | GUI로 전체 흐름을 시각적으로 파악 |
+| 오류 시 로그 파일 직접 확인 | 웹 UI에서 실행 이력/오류 즉시 확인 |
+| 재실행하려면 SSH 접속 필요 | 웹 UI에서 클릭 한 번으로 재실행 |
+| 슬랙/메일 알림 직접 구현 | 내장 노드로 즉시 연동 |
+| 수정 후 배포 프로세스 필요 | Claude Code가 JSON 직접 생성/수정 |
+
+### 9.2 docker-compose로 n8n 실행
+
+8.2에서 작성한 `docker-compose.yml`이 있는 디렉토리에서 실행합니다.
+
+```bash
+docker compose up -d          # 백그라운드 실행
+docker compose down           # 중지 (데이터 보존)
+docker compose logs -f n8n    # 실시간 로그 확인
+docker compose restart n8n    # n8n 컨테이너만 재시작
+docker compose pull && docker compose up -d  # 최신 버전으로 업데이트
+```
+
+### 9.3 웹 UI 접속 확인
+
+```
+로컬 환경:  http://localhost:5678
+원격 서버:  http://<서버IP>:5678
+```
+
+1. 웹 브라우저에서 위 주소로 접속합니다.
+2. 최초 접속 시 관리자 계정(이메일/비밀번호)을 설정합니다.
+3. 대시보드가 보이면 정상 실행 완료입니다.
+
+### 9.4 n8n API 설정 (MCP 연동 준비)
+
+n8n-MCP가 워크플로우를 직접 배포하려면 n8n API Key가 필요합니다.
+
+1. n8n 웹 UI → 우측 상단 프로필 → **Settings**
+2. **API** 메뉴 → **Create API Key**
+3. 생성된 키를 `.env` 파일의 `N8N_API_KEY`에 저장
+
+**API 동작 확인:**
+```bash
+curl -H "X-N8N-API-KEY: your_api_key" http://localhost:5678/api/v1/workflows
+```
+
+---
+
+## 10. n8n-MCP + n8n-skills 설정
+
+Claude Code가 n8n 노드를 **정확히** 알고 워크플로우를 생성하도록 AI 지식을 주입하는 단계입니다.
+
+> [!NOTE]
+> n8n-MCP 없이 Claude Code에게 워크플로우 생성을 요청하면 노드 속성을 '추측'으로 작성하여 오류가 빈번합니다. 반드시 설정하세요.
+
+### 10.1 n8n-MCP란?
+
+[n8n-MCP](https://github.com/czlonkowski/n8n-mcp)는 AI 어시스턴트에게 n8n **1,239개 노드**의 정확한 문서를 제공하는 MCP 서버입니다.
+
+- Claude Code가 `search_nodes`, `get_node_info` 등 도구를 통해 노드 속성을 실시간 조회
+- n8n API 연동 시 워크플로우 생성/수정/배포까지 자동화
+- 지원 IDE: Claude Code, Antigravity, Cursor, Windsurf, VS Code
+
+### 10.2 n8n-MCP 설치
+
+**Option A: Hosted Service (팀 공용 권장)**
+1. [dashboard.n8n-mcp.com](https://dashboard.n8n-mcp.com) 가입
+2. API Key 발급 (무료: 100 calls/day)
+3. 아래 10.3에서 API Key 설정
+
+**Option B: npx 로컬 실행 (개인 개발용)**
+```bash
+npx n8n-mcp
+```
+
+**Option C: Docker 자체 호스팅**
+```bash
+docker run -d --name n8n-mcp -e N8N_MCP_MODE=hosted czlonkowski/n8n-mcp
+```
+
+### 10.3 Claude Code에 MCP 연동
+
+프로젝트 루트 또는 홈 디렉토리에 `.mcp.json` 파일을 생성합니다.
+
+**Hosted Service 연동:**
+```json
+{
+  "mcpServers": {
+    "n8n": {
+      "command": "npx",
+      "args": ["-y", "n8n-mcp"],
+      "env": {
+        "N8N_MCP_MODE": "hosted",
+        "N8N_MCP_API_KEY": "your_hosted_api_key"
+      }
+    }
+  }
+}
+```
+
+**로컬 n8n 인스턴스 연동 (워크플로우 자동 배포):**
+```json
+{
+  "mcpServers": {
+    "n8n": {
+      "command": "npx",
+      "args": ["-y", "n8n-mcp"],
+      "env": {
+        "N8N_MCP_MODE": "hosted",
+        "N8N_MCP_API_KEY": "your_hosted_api_key",
+        "N8N_API_URL": "http://localhost:5678",
+        "N8N_API_KEY": "your_n8n_api_key"
+      }
+    }
+  }
+}
+```
+
+### 10.4 n8n-skills란?
+
+[n8n-skills](https://github.com/czlonkowski/n8n-skills)는 Claude Code에 설치하는 **7가지 전문 스킬**로, n8n-MCP를 더 정확하게 활용하도록 AI를 훈련시킵니다.
+
+| # | 스킬명 | 역할 |
+|---|--------|------|
+| 1 | Expression Syntax | `{{$json.body}}` 등 표현식 정확히 작성 |
+| 2 | **MCP Tools Expert** (최우선) | 어떤 MCP 도구를 언제 써야 하는지 판단 |
+| 3 | Workflow Patterns | 5가지 검증된 워크플로우 설계 패턴 |
+| 4 | Validation Expert | 유효성 오류 해석 및 수정 방법 |
+| 5 | Node Configuration | 노드 속성 간 의존성 설정 |
+| 6 | Code JavaScript | Code 노드에서 JS 올바르게 작성 |
+| 7 | Code Python | Code 노드에서 Python 작성법 및 제한사항 |
+
+### 10.5 n8n-skills 설치
+
+```bash
+# Claude Code 터미널에서 실행
+
+# 방법 1: 플러그인 명령어 (권장)
+/plugin install czlonkowski/n8n-skills
+
+# 방법 2: 수동 설치
+git clone https://github.com/czlonkowski/n8n-skills.git
+cp -r n8n-skills/skills/* ~/.claude/skills/
+```
+
+---
+
+## 11. Python → n8n 마이그레이션 전략
+
+기존 Python 코드/서비스 데몬을 n8n 워크플로우로 체계적으로 이전하는 방법입니다.
+
+### 11.1 마이그레이션 대상 유형 분류
+
+| Python 패턴 | n8n 대응 노드 | 난이도 |
+|---|---|---|
+| `schedule` / `cron` 데몬 | Schedule Trigger | 🟢 쉬움 |
+| `requests.get/post()` | HTTP Request | 🟢 쉬움 |
+| Slack/메일 알림 | Slack / Gmail / Email 노드 | 🟢 쉬움 |
+| `if / for` 조건·반복 로직 | IF / Switch / Loop Over Items | 🟡 보통 |
+| `json` 파싱 / 데이터 변환 | Set, Code (JS) | 🟡 보통 |
+| `subprocess` / 쉘 명령 | Execute Command | 🟡 보통 |
+| DB 쿼리 (`psycopg2`, `pymysql`) | Postgres / MySQL 노드 | 🟡 보통 |
+| 파일 읽기/쓰기 | Read/Write Binary File | 🟡 보통 |
+| Webhook 수신 (`Flask`, `FastAPI`) | Webhook Trigger | 🔴 주의 필요 |
+| 복잡한 비즈니스 로직 | Code 노드 (JS/Python) | 🔴 주의 필요 |
+
+### 11.2 마이그레이션 단계별 절차
+
+```
+1단계. Python 코드 분석
+   → 트리거 (언제 실행?) / 처리 로직 / 출력 (어디로 보냄?) 으로 분해
+
+2단계. 트리거 유형 파악
+   → 스케줄 실행? / Webhook 수신? / 수동 실행?
+
+3단계. Claude Code에 마이그레이션 요청 (11.3 참고)
+
+4단계. 생성된 JSON을 n8n 웹 UI에서 Import 후 테스트 실행
+
+5단계. 기존 Python 결과 vs n8n 결과 비교 검증 (11.4 체크리스트)
+
+6단계. 검증 완료 시 Python 데몬(systemd) 비활성화
+        n8n 워크플로우 Active 상태로 전환
+```
+
+### 11.3 Claude Code에게 마이그레이션 요청하는 법
+
+아래 프롬프트 패턴을 복사하여 Claude Code에 붙여넣고, Python 코드를 첨부하세요.
+
+```
+아래 Python 스크립트를 n8n 워크플로우 JSON으로 변환해줘.
+n8n-MCP 도구를 사용해서 정확한 노드 속성을 조회한 후 생성해.
+
+[Python 코드 붙여넣기]
+
+요구사항:
+- 트리거: (예: 매일 오전 9시 / Webhook 수신 / 수동 실행)
+- n8n 버전: 1.x (self-hosted, localhost:5678)
+- 출력: (예: 슬랙 #알림 채널로 전송 / DB 저장 / 파일 저장)
+- 오류 발생 시: 슬랙 #에러 채널로 알림
+```
+
+> [!TIP]
+> Python 코드 전체를 붙여넣는 것보다, 파일을 `@[파일명]` 형태로 참조하면 더 정확합니다.
+
+### 11.4 마이그레이션 검증 체크리스트
+
+- [ ] 트리거 타이밍이 기존과 동일한가?
+- [ ] HTTP 요청의 URL, 헤더, 바디가 동일한가?
+- [ ] 데이터 변환 결과값이 동일한가?
+- [ ] DB 저장 데이터가 동일한가?
+- [ ] 오류 발생 시 알림이 정상적으로 오는가?
+- [ ] n8n 실행 로그에 오류가 없는가?
+- [ ] Python 데몬과 n8n이 동시에 실행되어 중복 처리되지 않는가?
+
+---
+
+## 12. Claude Code로 n8n 워크플로우 개발
+
+### 12.1 권장 개발 플로우
+
+```
+Python 코드 분석
+    ↓
+Claude Code에 마이그레이션 요청
+(n8n-MCP + n8n-skills 활성화 상태)
+    ↓
+생성된 JSON을 n8n 웹 UI에서 Import
+    ↓
+테스트 실행
+    ↓ (오류 발생 시)
+Claude Code에 오류 로그 전달 → 수정 → 재Import
+    ↓ (정상 확인)
+기존 Python 데몬 비활성화
+n8n 워크플로우 Active 전환
+```
+
+### 12.2 워크플로우 JSON Import/Export
+
+**Export (워크플로우 백업/공유):**
+1. n8n 웹 UI → 워크플로우 목록
+2. 대상 워크플로우 우측 `⋮` 클릭 → **Download**
+3. `.json` 파일로 저장됨
+
+**Import (Claude Code가 생성한 JSON 적용):**
+1. n8n 웹 UI → 좌측 상단 **+** 버튼 → **Import from File**
+2. Claude Code가 생성한 `.json` 파일 선택
+3. Import 후 **Save**
+
+> [!NOTE]
+> 워크플로우 JSON을 Git으로 버전 관리하면 팀원 간 공유 및 롤백이 쉬워집니다.
+
+### 12.3 실전 예시: Python 데몬 → n8n 워크플로우
+
+**Before (Python 스크립트 예시):**
+```python
+import schedule
+import requests
+import time
+
+def check_api_and_notify():
+    response = requests.get("https://api.example.com/status")
+    data = response.json()
+    if data["status"] != "ok":
+        requests.post("https://hooks.slack.com/...",
+            json={"text": f"⚠️ 서비스 이상 감지: {data['message']}"})
+
+schedule.every(10).minutes.do(check_api_and_notify)
+while True:
+    schedule.run_pending()
+    time.sleep(1)
+```
+
+**Claude Code 요청:**
+```
+위 Python 데몬을 n8n 워크플로우 JSON으로 변환해줘.
+n8n-MCP로 HTTP Request, Schedule Trigger, Slack 노드 속성을 확인 후 생성해.
+- 트리거: 10분마다 실행
+- API 상태가 'ok'가 아닐 때만 슬랙 알림
+- 오류 발생 시 별도 슬랙 채널(#errors)로 알림
+```
+
+**After (n8n 워크플로우 구성):**
+```
+[Schedule Trigger: 10분마다]
+    → [HTTP Request: GET api.example.com/status]
+    → [IF: status != 'ok']
+        → True:  [Slack: #알림 채널 메시지 전송]
+        → False: [No Operation]
+```
+
+### 12.4 트러블슈팅
+
+| 오류 상황 | 원인 | 해결 방법 |
+|---|---|---|
+| `$json.body` undefined | Webhook 데이터 구조 미스매치 | Webhook 노드에서 `$json.body`로 접근 확인 |
+| Code 노드에서 `import` 오류 | Python 외부 라이브러리 미지원 | JS로 전환하거나 HTTP Request 노드 활용 |
+| Loop 노드 배치 오류 | 반환 형식 불일치 | `[{json: {...}}]` 형식으로 반환 확인 |
+| 인증 토큰 만료 | 액세스 토큰 미갱신 | Credentials 노드로 OAuth 자동 갱신 설정 |
+| 워크플로우 실행 안 됨 | Active 상태 미확인 | 웹 UI에서 워크플로우 Active 토글 ON 확인 |
 
 ---
 

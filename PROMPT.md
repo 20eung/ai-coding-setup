@@ -26,6 +26,11 @@
 5. Antigravity 설치 및 설정 (설치 가이드, 필수 VS Code 확장 프로그램(Remote-SSH, Claude Code for VS Code 등), 리모트 서버 접속 방법, 터미널 대화형 CLI(Gemini/Claude) 활용 및 확장 프로그램 UI 사용법 포함)
 6. GitHub 연동 및 자동화 (GitHub CLI(gh) 설치 및 인증, AI 기반 자동화 릴리즈 가이드)
 7. bkit 설치 (Claude Code 플러그인 마켓플레이스 활용 및 Gemini CLI 익스텐션 설치 방법 포함)
+8. Docker 환경 구성 (MacOS/Linux/Windows Docker Desktop 설치, docker-compose.yml 구조 해설, .env 파일 분리 보안 관리)
+9. n8n 컨테이너 설치 및 실행 ('n8n이란' 및 Python 데몬 대비 n8n의 장점 설명, docker compose 명령어 모음, n8n API Key 발급 및 MCP 연동 준비)
+10. n8n-MCP + n8n-skills 설정 (AI에 n8n 1,239개 노드 지식 주입, .mcp.json 설정, 7가지 스킬 설치 및 역할 소개)
+11. Python → n8n 마이그레이션 전략 (Python 패턴별 n8n 노드 매핑 테이블, 단계별 절차, Claude Code 활용 프롬프트 패턴, 마이그레이션 검증 체크리스트)
+12. Claude Code로 n8n 워크플로우 개발 (권장 개발 플로우, JSON Import/Export 방법, Python 데몬 → n8n 실전 예시, 트러블슈팅 가이드)
 
 문서 하단 구성:
 - 문의 사항 및 피드백용 이메일(20eung@gmail.com)을 포함하라.
@@ -37,4 +42,6 @@
 ```
 
 ---
-**업데이트 이력**: 2026-03-18 최종 고도화 (보안 설정, 리모트 접속 및 릴리즈 자동화 흐름 반영)
+**업데이트 이력**:
+- 2026-03-18: 최종 고도화 (보안 설정, 리모트 접속 및 릴리즈 자동화 흐름 반영)
+- 2026-03-24: Docker/n8n 환경, n8n-MCP+Skills, Python→n8n 마이그레이션 전략 추가 (섹션 8~12)
