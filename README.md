@@ -49,6 +49,9 @@
 4. [Claude Code 설치 및 설정](#4-claude-code-설치-및-설정)
    - [4.1 설치](#41-설치)
    - [4.2 AWS Bedrock 연동](#42-aws-bedrock-연동)
+     - [AWS Bedrock이란?](#aws-bedrock이란)
+     - [주요 특징](#주요-특징)
+     - [Claude Code에서 Bedrock을 사용하는 장점](#claude-code에서-bedrock을-사용하는-장점)
    - [4.3 프로젝트 컨텍스트 설정 (CLAUDE.md)](#43-프로젝트-컨텍스트-설정-claudemd)
 5. [Antigravity 설치 및 설정](#5-antigravity-설치-및-설정)
    - [5.1 설치](#51-설치)
@@ -264,6 +267,41 @@ npm install -g @anthropic-ai/claude-code
 ```
 
 ### 4.2 AWS Bedrock 연동
+
+#### AWS Bedrock이란?
+
+**AWS Bedrock**은 Amazon Web Services(AWS)에서 제공하는 완전관리형 생성형 AI 서비스입니다. Anthropic(Claude), Meta(Llama), Amazon(Titan), Cohere, Stability AI 등 다양한 AI 기업의 파운데이션 모델(Foundation Model)을 **단일 API**로 접근할 수 있습니다.
+
+#### 주요 특징
+
+| 특징 | 설명 |
+|---|---|
+| **완전관리형** | 서버/인프라 관리 불필요. AWS가 모든 운영 부담을 처리 |
+| **다양한 모델** | Claude, Llama, Titan, Cohere 등 여러 최신 모델을 하나의 API로 사용 |
+| **데이터 보안** | 사용자 데이터가 모델 학습에 사용되지 않음. VPC 내 트래픽 유지 가능 |
+| **엔터프라이즈 규정 준수** | SOC 2, HIPAA, GDPR 등 주요 보안 인증 준수 |
+| **IAM 통합** | AWS IAM으로 세밀한 접근 권한 제어. 정적 API 키 대신 역할 기반 인증 |
+| **사용량 기반 과금** | 호출한 만큼만 비용 발생. AWS 통합 청구로 비용 관리 편리 |
+| **멀티리전 지원** | 특정 리전에 데이터를 유지해야 하는 규정 준수 요구사항 충족 |
+
+#### Claude Code에서 Bedrock을 사용하는 장점
+
+- **비용 관리**: AWS Organizations의 통합 청구(Consolidated Billing)를 통해 팀/기업 단위 비용 추적 용이
+- **보안 강화**: Anthropic API 키를 코드나 환경변수에 노출하지 않아도 됨. IAM 역할로 인증
+  - **정적 키 제거**: Anthropic 직접 API는 `sk-ant-xxxxx` 형태의 고정 키를 `.env` 파일이나 환경변수에 보관해야 하지만, Bedrock은 이런 키 자체가 없음
+  - **임시 자격증명**: AWS IAM이 단기 만료 토큰(STS)을 자동 발급·갱신. 키가 탈취되어도 짧은 시간 후 무효화
+  - **최소 권한 원칙**: IAM 정책으로 "Bedrock의 특정 모델만 호출 가능" 수준으로 권한을 세밀하게 제한 가능
+  - **키 유출 위험 제거**: 실수로 API 키를 GitHub에 커밋하거나 로그에 출력하는 사고를 구조적으로 방지
+  - **서버/컨테이너 자동 인증**: EC2 인스턴스 프로파일, ECS 태스크 역할, Lambda 실행 역할 등을 통해 코드에 자격증명을 기입하지 않아도 자동 인증
+- **데이터 거주(Data Residency)**: 특정 AWS 리전 내에서만 데이터가 처리되어 국내 규정 준수 가능
+- **네트워크 격리**: AWS PrivateLink를 통해 인터넷을 경유하지 않고 AWS 내부 네트워크로만 통신
+- **감사 로그**: AWS CloudTrail로 모든 API 호출 기록 자동 저장
+- **기존 AWS 자산 활용**: 이미 AWS 계정이 있는 조직은 별도 계정 없이 즉시 사용 가능
+
+> [!NOTE]
+> 개인 사용자나 빠른 테스트 목적이라면 [Anthropic 직접 API](https://console.anthropic.com/)가 더 간편합니다. Bedrock은 보안, 규정 준수, 비용 통합이 중요한 **팀/기업 환경**에 특히 적합합니다.
+
+---
 
 Claude Code에서 AWS Bedrock을 백엔드로 사용하려면 적절한 권한 설정이 필요합니다. 환경변수에 직접 키를 노출하는 대신, AWS CLI 표준 방식인 `.aws` 디렉토리의 설정 파일을 사용하는 것이 보안상 더 안전합니다.
 
